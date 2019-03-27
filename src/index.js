@@ -4,6 +4,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './assets/styles/main.scss';
 
+
 ReactDOM.render(<App />, document.getElementById('easy-me'));
 
 // If you want your app to work offline and load faster, you can change

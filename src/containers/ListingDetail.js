@@ -1,18 +1,23 @@
 import React from 'react';
-import {
-  Row,
-  Col,
-  Container,
-  Image,
-  Button
-} from 'react-bootstrap'
-import { connect } from 'react-redux'
-import actions from '../actions'
+import { Row, Col, Container, Image, Button } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import actions from '../actions';
+import { SimpleSlider, ImageRenderer } from '../components';
+
+const renderImage = (image) => {
+  let index = image.match(/\d+/)[0];
+  return ImageRenderer(index);
+}
 
 class ListingDetail extends React.Component {
 
   componentDidMount() {
-    let id = this.props.match.params.id
+    this.init();
+    actions.getListing();
+  }
+
+  init = (itemId = '') => {
+    let id = itemId ? itemId : this.props.match.params.id
     actions.getDetail(id);
   }
 
@@ -23,8 +28,13 @@ class ListingDetail extends React.Component {
     })
   }
 
+  goto = (id) => {
+    this.props.history.replace(`/detail/${id}`)
+    this.init(id);
+  }
+
   render() {
-    const { detailObject = {} } = this.props.getListing;
+    const { detailObject = {}, data = [], fetching = false } = this.props.getListing;
     const {
       title = '',
       description = '',
@@ -35,30 +45,24 @@ class ListingDetail extends React.Component {
       seller_name = '',
       seller_type = ''
     } = detailObject && detailObject.data && detailObject.data.attributes || {};
+    const { links = {} } = detailObject;
 
     return (
       <div className="page-container">
-        <Container>
+        <Container className="container1">
           <Col>
             <Row>
               <Col xs={12} sm={12} md={8} className="detail-top">
                 <p>{`Home >  Electronics > Games & Console > ${title}`}</p>
-                <h2>{title}</h2>
+                <h2>{fetching ? '-' : title}</h2>
               </Col>
-              <Col xs={12} sm={12} md={4} >
-              
-              </Col>
+              <Col xs={12} sm={12} md={4} ></Col>
             </Row>
             <Row>
               <Col xs={12} sm={12} md={8} className="detail-dp">
                 <div className="dp-img">
-                  <img src={require('../assets/4.png')} />
+                  {links && links.image ? renderImage(links && links.image) : null }
                 </div>
-                <div className="desc-head">
-                  <div><h2>DESCRIPTION</h2></div>
-                  <div><p>Report</p></div>
-                </div>
-                <div className="description-text">{this.descriptionRenderer(description)}</div>
               </Col>
               <Col md={4} className="no-padding right-stickey-panel">
                 <div className="stickey-item">
@@ -104,7 +108,7 @@ class ListingDetail extends React.Component {
                   </div>
                   <div className="stickey-upper top-border-light">
                     <Row>
-                      <Col sm={12} md={12} xsHidden>
+                      <Col sm={12} md={12}>
                         <p>Intrested with the ad? Contact the seller</p>
                         <Button variant="outline-danger" size="sm" block><i class="fas fa-phone"></i> {phone}</Button>
                         <Button variant="outline-danger" size="sm" block><i class="far fa-envelope"></i> Email</Button>
@@ -114,13 +118,34 @@ class ListingDetail extends React.Component {
                   </div>
                 </div>
               </Col>
+              <Col xs={12} sm={12} md={8}>
+                <div className="desc-head">
+                  <div><h2>DESCRIPTION</h2></div>
+                  <div><p><i class="fas fa-flag"></i> Report</p></div>
+                </div>
+                <div className="description-text">{this.descriptionRenderer(description)}</div>
+              </Col>
+              <Col xs={12} sm={12} md={4}></Col>
             </Row>
           </Col>
-
+          <Col className="s-items">
+            <h3>SIMILAR ITEMS</h3>
+          </Col>
+          <Col className="slider-container">
+            <SimpleSlider
+              data={data}
+              goto={this.goto}
+            />
+          </Col>
+          <div className="fixed-bottom">
+            <Button variant="outline-danger" size="sm" inline><i class="fas fa-phone"></i> {phone}</Button>
+            <Button variant="outline-danger" size="sm" inline><i class="far fa-envelope"></i> Email</Button>
+            <Button variant="outline-danger" size="sm" inline><i class="far fa-comment-alt"></i> Chat</Button>
+          </div>
         </Container>
       </div>
     )
   }
 }
-
-export default connect(state => state)(ListingDetail);
+const mapStateToProps = (state) => state;
+export default connect(mapStateToProps)(ListingDetail);

@@ -1,17 +1,8 @@
 import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap'
+import { Container } from 'react-bootstrap'
 import { connect } from 'react-redux'
 import actions from '../actions'
-
-const imageRenderer = (key) => {
-  if (key ==1 || key%3 === 1) {
-    return <img src={require('../assets/1.png')} />
-  } else if (key ==2  || key % 3 == 2) {
-    return <img src={require('../assets/2.png')} />
-  } else {
-    return <img src={require('../assets/3.png')} />
-  }
-}
+import { ImageRenderer, Loader } from '../components';
 
 class Homepage extends React.Component {
 
@@ -20,15 +11,13 @@ class Homepage extends React.Component {
   }
 
   onRedirectDetail = (id) => {
-    console.log("dsakfksdfa", id)
     this.props.history.push(`/detail/${id}`)
   }
 
-  renderItem = ({ attributes: { title, price, links }, id }, key) => {
-    
-    return <div key={id} className="card" onClick={(text) => this.onRedirectDetail(id)}>
+  renderItem = ({ attributes: { title, price }, id }, key) => {
+    return <div key={id} className="card" onClick={() => this.onRedirectDetail(id)}>
       <div>
-        {imageRenderer(key+ 1)}
+        {ImageRenderer(key+ 1)}
         <div className="card-info">
           <p>{title.length > 20 ? title.substr(0, 35) : title}</p>
           <h6>{price}</h6>
@@ -39,8 +28,10 @@ class Homepage extends React.Component {
 
   render() {
     const { data = [], fetching = false } = this.props.getListing;
-    console.log(data, "data");
-
+    
+    if (fetching) {
+      return <Loader />
+    }
     return (
       <div className="page-container">
         <Container>
@@ -50,9 +41,10 @@ class Homepage extends React.Component {
           </div>
         </Container>
       </div>
-
     )
   }
 }
 
-export default connect(state => state)(Homepage)
+const mapStateToProps = (state) => state;
+
+export default connect(mapStateToProps)(Homepage)
